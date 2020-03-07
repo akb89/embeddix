@@ -85,13 +85,17 @@ def _convert_bert_to_text(vocab_filepath):
     vocab = load_vocab(vocab_filepath)
     bert_opt_filepath = os.path.join(
         os.path.dirname(vocab_filepath),
-        'bert-{}.txt'.format(os.path.basename(vocab_filepath).split('.vocab')[0]))
+        'bert-{}.txt'.format(
+            os.path.basename(vocab_filepath).split('.vocab')[0]))
     bc = BertClient()
-    words = list(vocab.keys())
-    vectors = bc.encode(words)
+    # words = list(vocab.keys())
+    # vectors = bc.encode(words)
     with open(bert_opt_filepath, 'w', encoding='utf-8') as opt_stream:
-        for word, vector in zip(words, vectors):
-            print('{} {}'.format(word, vector), file=opt_stream)
+        for word in vocab:
+            vector = bc.encode([word])[0]
+            print(vector)
+            print('{} {}'.format(word, ' '.join(str(x) for x in vector)),
+                  file=opt_stream)
 
 
 def convert_bert_to_text(args):
