@@ -23,7 +23,7 @@ setup(
     keywords=['word embeddings', 'random', 'hack'],
     platforms=['any'],
     packages=['embeddix', 'embeddix.logging', 'embeddix.exceptions',
-              'embeddix.utils', 'embeddix.core'],
+              'embeddix.utils'],
     package_data={'embeddix': ['logging/*.yml', 'resources/*']},
     include_package_data=True,
     entry_points={
