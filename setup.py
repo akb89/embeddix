@@ -31,7 +31,8 @@ setup(
             'embeddix = embeddix.main:main'
         ],
     },
-    install_requires=['pyyaml>=4.2b1'],
+    install_requires=['pyyaml>=4.2b1', 'tensorflow==1.10.0',
+                      'bert-serving-client==1.10.0'],
     classifiers=['Development Status :: 2 - Pre-Alpha',
                  'Environment :: Web Environment',
                  'Intended Audience :: Developers',
