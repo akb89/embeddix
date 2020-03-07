@@ -88,12 +88,10 @@ def _convert_bert_to_text(vocab_filepath):
         os.path.dirname(vocab_filepath),
         'bert-{}.txt'.format(
             os.path.basename(vocab_filepath).split('.vocab')[0]))
-    bc = BertClient()
-    # words = list(vocab.keys())
-    # vectors = bc.encode(words)
+    bert_client = BertClient()
     with open(bert_opt_filepath, 'w', encoding='utf-8') as opt_stream:
         for word in tqdm(vocab, total=len(vocab)):
-            vector = bc.encode([word])[0]
+            vector = bert_client.encode([word])[0]
             print('{} {}'.format(word, ' '.join(str(x) for x in vector)),
                   file=opt_stream)
 
