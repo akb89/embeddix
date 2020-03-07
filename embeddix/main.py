@@ -17,11 +17,11 @@ logging.config.dictConfig(
 logger = logging.getLogger(__name__)
 
 
-__all__ = ('load_vocab')
+__all__ = ('load_vocab', 'save_to_text')
 
 
 def load_vocab(vocab_filepath):
-    """Load word_to_idx dict mapping from .vocab filepath"""
+    """Load word_to_idx dict mapping from .vocab filepath."""
     word_to_idx = {}
     logger.info('Loading vocabulary from {}'.format(vocab_filepath))
     with open(vocab_filepath, 'r', encoding='utf-8') as input_stream:
@@ -31,6 +31,22 @@ def load_vocab(vocab_filepath):
     return word_to_idx
 
 
+def save_to_text(vocab, model, filepath):
+    """Save vocab + numpy model to unique text file.
+
+    vocab should be a word_to_idx dict
+    model should be a numpy ndarray
+    filepath should be the full filepath to output text file
+    """
+    with open(filepath, 'w', encoding='utf-8') as otp:
+        for word, idx in vocab.items():
+            vector = ' '.join([str(item) for item in model[idx].tolist()])
+            print('{} {}'.format(word, vector), file=otp)
+
+
+def save_to_numpy():
+    pass
+
+
 def main():
     """Launch embeddix."""
-    pass
