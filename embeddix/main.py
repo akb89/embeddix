@@ -8,6 +8,7 @@ import argparse
 import logging
 import logging.config
 
+from tqdm import tqdm
 from bert_serving.client import BertClient
 
 import embeddix.utils.config as cutils
@@ -91,9 +92,8 @@ def _convert_bert_to_text(vocab_filepath):
     # words = list(vocab.keys())
     # vectors = bc.encode(words)
     with open(bert_opt_filepath, 'w', encoding='utf-8') as opt_stream:
-        for word in vocab:
+        for word in tqdm(vocab, total=len(vocab)):
             vector = bc.encode([word])[0]
-            print(vector)
             print('{} {}'.format(word, ' '.join(str(x) for x in vector)),
                   file=opt_stream)
 
