@@ -8,6 +8,8 @@ import argparse
 import logging
 import logging.config
 
+import numpy as np
+
 from tqdm import tqdm
 from bert_serving.client import BertClient
 
@@ -24,14 +26,12 @@ logger = logging.getLogger(__name__)
 __all__ = ('load_vocab', 'save_to_text')
 
 
-# def load_vocab(vocab_filepath):
-#     """Load words list from vocab text file."""
-#     logger.info('Loading vocabulary from {}'.format(vocab_filepath))
-#     words = []
-#     with open(vocab_filepath, 'r', encoding='utf-8') as input_stream:
-#         for line in input_stream:
-#             words.append(line.strip())
-#     return words
+def save_vocab(vocab, output_vocab_filepath):
+    """Save vocab to filepath."""
+    with open(output_vocab_filepath, 'w', encoding='utf-8') as output_stream:
+        for word, idx in vocab.items():
+            print('{}\t{}'.format(idx, word), file=output_stream)
+
 
 
 def load_vocab(vocab_filepath):
@@ -77,8 +77,10 @@ def save_to_text(vocab, model, filepath):
             print('{} {}'.format(word, vector), file=otp)
 
 
-def save_to_numpy():
-    pass
+def save_to_numpy(vocab, model, filepath):
+    """Save vocab + numpy model to numpy."""
+    np.save(filepath, model)
+    save_vocab(vocab, '{}.vocab'.format(filepath))
 
 
 def _convert_bert_to_text(vocab_filepath):
