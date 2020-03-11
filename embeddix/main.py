@@ -147,22 +147,26 @@ def _align_vocabs_and_models(args):
     logger.info('Aligning vocabularies under {}'.format(args.model_dir))
     shared_vocab = _load_shared_vocab(args.model_dir)
     logger.info('Shared vocabulary size = {}'.format(len(shared_vocab)))
-    # model_names = [filename.split('.npy')[0] for filename in
-    #                os.listdir(args.model_dir) if filename.endswith('.npy')]
-    # for model_name in model_names:
-    #     model_filepath = os.path.join(args.model_dir,
-    #                                   '{}.npy'.format(model_name))
-    #     model = np.load(model_filepath)
-    #     vocab_filepath = os.path.join(args.model_dir,
-    #                                   '{}.vocab'.format(model_name))
-    #     vocab = load_vocab(vocab_filepath)
-    #     reduced_model = _reduce_model(model, vocab, shared_vocab)
-    #     reduced_model_filepath = os.path.join(args.model_dir,
-    #                                           '{}-reduced'.format(model_name))
-    #     np.save(reduced_model_filepath, reduced_model)
-    # output_vocab_filepath = os.path.join(args.model_dir, 'shared.vocab')
-    # save_vocab(shared_vocab, output_vocab_filepath)
-
+    model_names = [filename.split('.npy')[0] for filename in
+                   os.listdir(args.model_dir) if filename.endswith('.npy')]
+    logger.info('Processing models = {}'.format(model_names))
+    for model_name in model_names:
+        model_filepath = os.path.join(args.model_dir,
+                                      '{}.npy'.format(model_name))
+        model = np.load(model_filepath)
+        vocab_filepath = os.path.join(args.model_dir,
+                                      '{}.vocab'.format(model_name))
+        vocab = load_vocab(vocab_filepath)
+        reduced_model = _reduce_model(model, vocab, shared_vocab)
+        reduced_model_filepath = os.path.join(args.model_dir,
+                                              '{}-reduced'.format(model_name))
+        np.save(reduced_model_filepath, reduced_model)
+        reduced_vocab_filepath = os.path.join(
+            args.model_dir, '{}-reduced.vocab'.format(model_name))
+        save_vocab(shared_vocab, reduced_vocab_filepath)
+        if args.export_to_text:
+            _convert_numpy_to_text('{}.npy'.format(reduced_model_filepath),
+                                   reduced_vocab_filepath)
 
 
 def main():
@@ -186,14 +190,18 @@ def main():
                                 help='absolute path to vocabulary')
     parser_convert.add_argument('-m', '--model',
                                 help='absolute path to numpy model')
-    parser_align_vocab = subparsers.add_parser(
-        'align-vocab', formatter_class=argparse.RawTextHelpFormatter,
+    parser_reduce = subparsers.add_parser(
+        'reduce', formatter_class=argparse.RawTextHelpFormatter,
         help='align numpy model vocabularies. Will also align the .npy models')
-    parser_align_vocab.set_defaults(func=_align_vocabs_and_models)
-    parser_align_vocab.add_argument('-i', '--model-dir', required=True,
-                                    help='absolute path to .npy models '
-                                         'directory. The directory should '
-                                         'contain the .vocab file '
-                                         'corresponding to the .npy model.')
+    parser_reduce.set_defaults(func=_align_vocabs_and_models)
+    parser_reduce.add_argument('-i', '--model-dir', required=True,
+                               help='absolute path to .npy models '
+                                    'directory. The directory should '
+                                    'contain the .vocab file '
+                                    'corresponding to the .npy model.')
+    parser_reduce.add_argument('-t', '--export-to-text',
+                               action='store_true',
+                               help='if passed, will also export models'
+                                    'to .text format')
     args = parser.parse_args()
     args.func(args)
