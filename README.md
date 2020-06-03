@@ -45,5 +45,5 @@ embeddix convert --to txt --embeddings /absolute/path/to/embeddings.npy
 
 ### Align vocabularies across models
 ```
-embeddix reduce --embeddings /absolute/path/to/model/directory/
+embeddix reduce --embeddings /absolute/path/to/embeddings/directory/
 ```

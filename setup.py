@@ -16,7 +16,7 @@ setup(
     author_email='akb@3azouz.net',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    version='1.0.1',
+    version='1.1.0',
     url='https://github.com/akb89/embeddix',
     download_url='https://github.com/akb89/embeddix',
     license='MIT',
