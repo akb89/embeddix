@@ -31,7 +31,7 @@ setup(
             'embeddix = embeddix.main:main'
         ],
     },
-    install_requires=['pyyaml>=4.2b1', 'tqdm==4.35.0'],
+    install_requires=['pyyaml>=4.2b1', 'tqdm==4.35.0', 'numpy==1.18.4'],
     classifiers=['Development Status :: 5 - Production/Stable ',
                  'Environment :: Web Environment',
                  'Intended Audience :: Developers',
