@@ -2,3 +2,4 @@
 __pycache__
 data/
 models/
+.pytest_cache/

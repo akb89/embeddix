@@ -2,6 +2,7 @@
 
 import embeddix
 
+
 def test_get_shared_vocab():
     vocabs = [{
         'a': 0,
@@ -16,8 +17,7 @@ def test_get_shared_vocab():
         'p': 0,
         'c': 42
     }]
-    shared_vocab = embeddix._get_shared_vocab(vocabs)
-    print(shared_vocab)
+    shared_vocab = embeddix.get_shared_vocab(vocabs)
     assert len(shared_vocab) == 1
     for word, idx in shared_vocab.items():
         assert word == 'c'

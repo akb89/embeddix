@@ -17,4 +17,4 @@ if __name__ == '__main__':
         A = np.load(A_path)
         B = np.load(B_path)
         rmse = matrixor.align(A, B)
-        print('{}\t{}\tRMSE = ')
+        print('{}\t{}\tRMSE = {}'.format(A_name, B_name, rmse))

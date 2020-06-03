@@ -11,7 +11,6 @@ import logging.config
 import numpy as np
 
 from tqdm import tqdm
-from bert_serving.client import BertClient
 
 import embeddix.utils.config as cutils
 
@@ -21,16 +20,6 @@ logging.config.dictConfig(
         os.path.join(os.path.dirname(__file__), 'logging', 'logging.yml')))
 
 logger = logging.getLogger(__name__)
-
-
-__all__ = ('load_vocab', 'save_to_text', '_get_shared_vocab')
-
-
-def save_vocab(vocab, output_vocab_filepath):
-    """Save vocab to filepath."""
-    with open(output_vocab_filepath, 'w', encoding='utf-8') as output_stream:
-        for word, idx in vocab.items():
-            print('{}\t{}'.format(idx, word), file=output_stream)
 
 
 def load_vocab(vocab_filepath):
@@ -44,74 +33,14 @@ def load_vocab(vocab_filepath):
     return word_to_idx
 
 
-def _extract_vocab(model_filepath):
-    words = []
-    with open(model_filepath, 'r', encoding='utf-8') as m_stream:
-        for line in m_stream:
-            line = line.strip()
-            word = line.split(' ')[0]
-            words.append(word)
-    vocab_filepath = '{}.vocab'.format(
-        os.path.abspath(model_filepath).split('.txt')[0])
-    with open(vocab_filepath, 'w', encoding='utf-8') as v_stream:
-        for idx, word in enumerate(words):
-            print('{}\t{}'.format(idx, word), file=v_stream)
-
-
-def extract_vocab(args):
-    """Extract vocabulary from txt vectors."""
-    _extract_vocab(args.vectors)
-
-
-def save_to_text(vocab, model, filepath):
-    """Save vocab + numpy model to unique text file.
-
-    vocab should be a word_to_idx dict
-    model should be a numpy ndarray
-    filepath should be the full filepath to output text file
-    """
-    with open(filepath, 'w', encoding='utf-8') as otp:
-        for word, idx in vocab.items():
-            vector = ' '.join([str(item) for item in model[idx].tolist()])
-            print('{} {}'.format(word, vector), file=otp)
-
-
-def save_to_numpy(vocab, model, filepath):
-    """Save vocab + numpy model to numpy."""
-    np.save(filepath, model)
-    save_vocab(vocab, '{}.vocab'.format(filepath))
-
-
-def _convert_numpy_to_text(model_filepath, vocab_filepath):
-    vocab = load_vocab(vocab_filepath)
-    model = np.load(model_filepath)
-    txt_model_fp = os.path.join(
-        os.path.dirname(model_filepath),
-        '{}.txt'.format(os.path.basename(model_filepath).split('.npy')[0]))
-    save_to_text(vocab, model, txt_model_fp)
-
-
-def _convert_bert_to_text(vocab_filepath):
-    """Generate a vectors txt file from BERT for a given vocabulary."""
-    # https://github.com/google-research/bert/issues/60
-    vocab = load_vocab(vocab_filepath)
-    bert_opt_filepath = os.path.join(
-        os.path.dirname(vocab_filepath),
-        'bert-{}.txt'.format(
-            os.path.basename(vocab_filepath).split('.vocab')[0]))
-    bert_client = BertClient()
-    with open(bert_opt_filepath, 'w', encoding='utf-8') as opt_stream:
-        for word in tqdm(vocab, total=len(vocab)):
-            vector = bert_client.encode([word])[0]
-            print('{} {}'.format(word, ' '.join(str(x) for x in vector)),
-                  file=opt_stream)
-
-
-def _convert(args):
-    if args.what == 'bert':
-        _convert_bert_to_text(args.vocab)
-    elif args.what == 'numpy':
-        _convert_numpy_to_text(args.model, args.vocab)
+def count_lines(input_filepath):
+    """Count number of non-empty lines in file."""
+    counter = 0
+    with open(input_filepath, 'r', encoding='utf-8') as input_str:
+        for line in input_str:
+            if line.strip():
+                counter += 1
+    return counter
 
 
 def _get_shared_vocab(vocabs):
@@ -144,8 +73,9 @@ def _reduce_model(model, vocab, shared_vocab):
 
 
 def _align_vocabs_and_models(args):
-    logger.info('Aligning vocabularies under {}'.format(args.model_dir))
-    shared_vocab = _load_shared_vocab(args.model_dir)
+    logger.info('Aligning vocabularies under {}'
+                .format(args.embeddings_dirpath))
+    shared_vocab = _load_shared_vocab(args.embeddings_dirpath)
     logger.info('Shared vocabulary size = {}'.format(len(shared_vocab)))
     model_names = [filename.split('.npy')[0] for filename in
                    os.listdir(args.model_dir) if filename.endswith('.npy')]
@@ -163,10 +93,87 @@ def _align_vocabs_and_models(args):
         np.save(reduced_model_filepath, reduced_model)
         reduced_vocab_filepath = os.path.join(
             args.model_dir, '{}-reduced.vocab'.format(model_name))
-        save_vocab(shared_vocab, reduced_vocab_filepath)
-        if args.export_to_text:
-            _convert_numpy_to_text('{}.npy'.format(reduced_model_filepath),
-                                   reduced_vocab_filepath)
+        with open(reduced_vocab_filepath, 'w', encoding='utf-8') as output_str:
+            for word, idx in shared_vocab.items():
+                print('{}\t{}'.format(idx, word), file=output_str)
+
+
+def _extract_words_and_vectors_from_txt(embeddings_filepath):
+    words = []
+    vectors = None
+    with open(embeddings_filepath, 'r', encoding='utf-8') as input_str:
+        for line in tqdm(input_str, total=count_lines(embeddings_filepath)):
+            line = line.strip()
+            if line:
+                tokens = line.split(' ', 1)
+                key = tokens[0].lower()
+                words.append(key)
+                value = np.fromstring(tokens[1], dtype='float32', sep=' ')
+                if not np.any(vectors):
+                    vectors = value
+                else:
+                    vectors = np.vstack((vectors, value))
+    return words, vectors
+
+
+def _convert_to_txt(embeddings_filepath, vocab_filepath):
+    logger.info('Converting input numpy file to txt: {}'
+                .format(embeddings_filepath))
+    vocab = load_vocab(vocab_filepath)
+    model = np.load(embeddings_filepath)
+    txt_model_filepath = '{}.txt'.format(embeddings_filepath.split('.npy')[0])
+    logger.info('Saving output to {}'.format(txt_model_filepath))
+    with open(txt_model_filepath, 'w', encoding='utf-8') as otp:
+        for word, idx in vocab.items():
+            vector = ' '.join([str(item) for item in model[idx].tolist()])
+            print('{} {}'.format(word, vector), file=otp)
+
+
+def _convert_to_numpy(embeddings_filepath):
+
+    logger.info('Converting input txt file to numpy: {}'
+                .format(embeddings_filepath))
+    output_filepath = '{}'.format(embeddings_filepath.split('.txt')[0])
+    words, vectors = _extract_words_and_vectors_from_txt(embeddings_filepath)
+    logger.info('Saving numpy vectors to {}.npy'.format(output_filepath))
+    np.save(output_filepath, vectors)
+    vocab_filepath = '{}.vocab'.format(output_filepath)
+    logger.info('Saving vocabulary to {}'.format(vocab_filepath))
+    with open(vocab_filepath, 'w', encoding='utf-8') as vocab_stream:
+        for idx, word in enumerate(words):
+            print('{}\t{}'.format(idx, word), file=vocab_stream)
+
+
+def _convert(args):
+    if args.to == 'numpy':
+        if not args.embeddings.endswith('.txt'):
+            raise Exception('Invalid input file: should be a text file '
+                            'ending with .txt')
+        _convert_to_numpy(args.embeddings)
+    else:
+        if not args.embeddings.endswith('.npy'):
+            raise Exception('Invalid input file: should be a numpy file '
+                            'ending with .npy')
+        if not args.vocab:
+            raise Exception('Converting to txt requires specifying the '
+                            '--vocab parameter')
+        _convert_to_txt(args.embeddings, args.vocab)
+
+
+def _extract_vocab(args):
+    words = []
+    logger.info('Extracting vocabulary from {}'.format(args.embeddings))
+    with open(args.embeddings, 'r', encoding='utf-8') as m_stream:
+        for line in tqdm(m_stream, total=count_lines(args.embeddings)):
+            line = line.strip()
+            word = line.split(' ')[0]
+            words.append(word)
+    vocab_filepath = '{}.vocab'.format(
+        os.path.abspath(args.embeddings).split('.txt')[0])
+    with open(vocab_filepath, 'w', encoding='utf-8') as v_stream:
+        for idx, word in enumerate(words):
+            print('{}\t{}'.format(idx, word), file=v_stream)
+    logger.info('Extracted {} words'.format(len(words)))
 
 
 def main():
@@ -175,33 +182,28 @@ def main():
     subparsers = parser.add_subparsers()
     parser_extract = subparsers.add_parser(
         'extract', formatter_class=argparse.RawTextHelpFormatter,
-        help='extract vocab from vectors txt file')
-    parser_extract.set_defaults(func=extract_vocab)
-    parser_extract.add_argument('-v', '--vectors', required=True,
-                                help='input vectors in txt format')
+        help='extract vocab from embeddings txt file')
+    parser_extract.set_defaults(func=_extract_vocab)
+    parser_extract.add_argument('-e', '--embeddings', required=True,
+                                help='input embedding in txt format')
     parser_convert = subparsers.add_parser(
         'convert', formatter_class=argparse.RawTextHelpFormatter,
-        help='convert BERT model to txt file')
+        help='convert embeddings to and from numpy and txt formats')
     parser_convert.set_defaults(func=_convert)
-    parser_convert.add_argument('-w', '--what', required=True,
-                                choices=['bert', 'numpy'],
+    parser_convert.add_argument('-t', '--to', choices=['numpy', 'txt'],
+                                help='output format: numpy or text')
+    parser_convert.add_argument('-v', '--vocab',
                                 help='absolute path to vocabulary')
-    parser_convert.add_argument('-v', '--vocab', required=True,
-                                help='absolute path to vocabulary')
-    parser_convert.add_argument('-m', '--model',
-                                help='absolute path to numpy model')
+    parser_convert.add_argument('-e', '--embeddings', required=True,
+                                help='absolute path to embeddings file')
     parser_reduce = subparsers.add_parser(
         'reduce', formatter_class=argparse.RawTextHelpFormatter,
         help='align numpy model vocabularies. Will also align the .npy models')
     parser_reduce.set_defaults(func=_align_vocabs_and_models)
-    parser_reduce.add_argument('-i', '--model-dir', required=True,
+    parser_reduce.add_argument('-d', '--embeddings-dir', required=True,
                                help='absolute path to .npy models '
                                     'directory. The directory should '
-                                    'contain the .vocab file '
-                                    'corresponding to the .npy model.')
-    parser_reduce.add_argument('-t', '--export-to-text',
-                               action='store_true',
-                               help='if passed, will also export models'
-                                    'to .text format')
+                                    'contain the .vocab files '
+                                    'corresponding to the .npy models.')
     args = parser.parse_args()
     args.func(args)
