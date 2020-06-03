@@ -74,25 +74,25 @@ def _reduce_model(model, vocab, shared_vocab):
 
 def _align_vocabs_and_models(args):
     logger.info('Aligning vocabularies under {}'
-                .format(args.embeddings_dirpath))
-    shared_vocab = _load_shared_vocab(args.embeddings_dirpath)
+                .format(args.embeddings))
+    shared_vocab = _load_shared_vocab(args.embeddings)
     logger.info('Shared vocabulary size = {}'.format(len(shared_vocab)))
     model_names = [filename.split('.npy')[0] for filename in
-                   os.listdir(args.model_dir) if filename.endswith('.npy')]
+                   os.listdir(args.embeddings) if filename.endswith('.npy')]
     logger.info('Processing models = {}'.format(model_names))
     for model_name in model_names:
-        model_filepath = os.path.join(args.model_dir,
+        model_filepath = os.path.join(args.embeddings,
                                       '{}.npy'.format(model_name))
         model = np.load(model_filepath)
-        vocab_filepath = os.path.join(args.model_dir,
+        vocab_filepath = os.path.join(args.embeddings,
                                       '{}.vocab'.format(model_name))
         vocab = load_vocab(vocab_filepath)
         reduced_model = _reduce_model(model, vocab, shared_vocab)
-        reduced_model_filepath = os.path.join(args.model_dir,
+        reduced_model_filepath = os.path.join(args.embeddings,
                                               '{}-reduced'.format(model_name))
         np.save(reduced_model_filepath, reduced_model)
         reduced_vocab_filepath = os.path.join(
-            args.model_dir, '{}-reduced.vocab'.format(model_name))
+            args.embeddings, '{}-reduced.vocab'.format(model_name))
         with open(reduced_vocab_filepath, 'w', encoding='utf-8') as output_str:
             for word, idx in shared_vocab.items():
                 print('{}\t{}'.format(idx, word), file=output_str)
@@ -200,7 +200,7 @@ def main():
         'reduce', formatter_class=argparse.RawTextHelpFormatter,
         help='align numpy model vocabularies. Will also align the .npy models')
     parser_reduce.set_defaults(func=_align_vocabs_and_models)
-    parser_reduce.add_argument('-d', '--embeddings-dir', required=True,
+    parser_reduce.add_argument('-d', '--embeddings', required=True,
                                help='absolute path to .npy models '
                                     'directory. The directory should '
                                     'contain the .vocab files '
