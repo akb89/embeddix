@@ -10,6 +10,7 @@ import logging.config
 
 import embeddix.core.converter as converter
 import embeddix.core.extractor as extractor
+import embeddix.core.evaluator as evaluator
 import embeddix.core.reducer as reducer
 import embeddix.utils.config as cutils
 
@@ -45,6 +46,11 @@ def _extract(args):
     extractor.extract_vocab(args.embeddings)
 
 
+def _evaluate(args):
+    evaluator.evaluate_distributional_space(args.embeddings, args.vocab,
+                                            args.dataset)
+
+
 def main():
     """Launch embeddix."""
     parser = argparse.ArgumentParser(prog='embeddix')
@@ -69,10 +75,22 @@ def main():
         'reduce', formatter_class=argparse.RawTextHelpFormatter,
         help='align numpy model vocabularies. Will also align the .npy models')
     parser_reduce.set_defaults(func=_reduce)
-    parser_reduce.add_argument('-d', '--embeddings', required=True,
+    parser_reduce.add_argument('-e', '--embeddings', required=True,
                                help='absolute path to .npy models '
                                     'directory. The directory should '
                                     'contain the .vocab files '
-                                    'corresponding to the .npy models.')
+                                    'corresponding to the .npy models')
+    parser_evaluate = subparsers.add_parser(
+        'evaluate', formatter_class=argparse.RawTextHelpFormatter,
+        help='evaluate embeddings model on various intrinsic tasks')
+    parser_evaluate.set_defaults(func=_evaluate)
+    parser_evaluate.add_argument('-e', '--embeddings', required=True,
+                                 help='absolute path to .npy embeddings')
+    parser_evaluate.add_argument('-v', '--vocab', required=True,
+                                 help='absolute path to .vocab file')
+    parser_evaluate.add_argument('-d', '--dataset', required=True,
+                                 choices=['ap', 'battig', 'essli', 'men',
+                                          'simlex', 'simverb'],
+                                 help='which dataset to evaluate on')
     args = parser.parse_args()
     args.func(args)

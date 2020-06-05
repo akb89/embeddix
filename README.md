@@ -47,3 +47,12 @@ embeddix convert --to txt --embeddings /absolute/path/to/embeddings.npy
 ```
 embeddix reduce --embeddings /absolute/path/to/embeddings/directory/
 ```
+
+### Evaluate DSM on intrinsic tasks
+Evaluate on lexical similarity (men, simlex, simverb) or concept categorization (essli, ap, battig)
+```
+embeddix evaluate \
+--embeddings /absolute/path/to/embeddings.npy \
+--vocab /absolute/path/to/embeddings.vocab \
+--dataset instrinsic_task_dataset_name
+```
