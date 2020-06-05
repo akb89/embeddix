@@ -8,7 +8,7 @@ import matrixor
 
 
 if __name__ == '__main__':
-    INPUT_DIRPATH = '/Users/akb/Github/embeddix/models/original'
+    INPUT_DIRPATH = '/home/debian/embeddings/models/reduced'
     MODELS_PATH = [os.path.join(INPUT_DIRPATH, filename) for filename in
                    os.listdir(INPUT_DIRPATH) if filename.endswith('.npy')]
     for A_path, B_path in itertools.combinations(MODELS_PATH, 2):

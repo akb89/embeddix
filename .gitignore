@@ -4,4 +4,3 @@ data/
 models/
 .pytest_cache/
 dist/
-experiments/
