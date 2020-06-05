@@ -48,7 +48,8 @@ def _evaluate_word_similarity(model, vocab, dataset):
     model_sim = metrix.similarity(left_vectors, right_vectors)
     spr = metrix.spearman(sim, model_sim)
     if np.isnan(spr):
-        return -1.
+        spr = -1.
+    logger.info('Spearman correlation = {}'.format(spr))
     return spr
 
 
@@ -57,9 +58,6 @@ def evaluate_distributional_space(embeddings_filepath, vocab_filepath,
     """Evaluate embeddings on lexical similarity or concept categorization."""
     if dataset not in ['ap', 'battig', 'essli', 'men', 'simlex', 'simverb']:
         raise Exception('Unsupported dataset: {}'.format(dataset))
-    logger.info('Evaluating model on {}'.format(dataset))
-    logger.info('Loading distributional space from {}'
-                .format(embeddings_filepath))
     model = np.load(embeddings_filepath)
     vocab = futils.load_vocab(vocab_filepath)
     if dataset in ['men', 'simlex', 'simverb']:

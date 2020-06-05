@@ -47,6 +47,7 @@ def _extract(args):
 
 
 def _evaluate(args):
+    logger.info('Loading distributional space from {}'.format(args.embeddings))
     evaluator.evaluate_distributional_space(args.embeddings, args.vocab,
                                             args.dataset)
 

@@ -12,6 +12,9 @@ loggers:
   embeddix.main:
     level: INFO
     handlers: [console]
+  embeddix.core:
+    level: INFO
+    handlers: [console]
   embeddix.utils:
     level: INFO
     handlers: [console]
