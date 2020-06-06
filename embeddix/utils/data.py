@@ -32,12 +32,20 @@ def _load_categories_to_words_dict(dataset, vocab):
         raise Exception('Invalid concept categorization dataset: {}'
                         .format(dataset))
     categories_to_words = defaultdict(list)
+    total_num_rows = 0
     with open(DATASETS[dataset], newline='') as csv_stream:
         next(csv_stream)
         reader = csv.reader(csv_stream, quotechar='|')
         for row in reader:
-            if row[2] and row[2] in vocab:
-                categories_to_words[row[1]].append(row[2])
+            if row[2]:
+                total_num_rows += 1
+                if row[2] in vocab:
+                    categories_to_words[row[1]].append(row[2])
+                else:
+                    logger.info('Word not in vocabulary: {}'.format(row[2]))
+    logger.info('Processing {} words out of {} in {} categories'
+                .format(sum(len(x) for x in categories_to_words.values()),
+                        total_num_rows, len(categories_to_words)))
     return categories_to_words
 
 

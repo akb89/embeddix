@@ -4,6 +4,39 @@
 2. Reduce models (align their vocabularies)
 3. Convert reduced models to text files
 
+## Transorm numpy models with Conceptor-Negation
+```python
+import os
+import sys
+import numpy as np
+
+
+def apply_conceptor_negation(vectors, alpha):
+    num_words = vectors.shape[0]
+    dim = vectors.shape[1]
+    x_collector = vectors.T  # put the word vectors in columns
+    R = x_collector.dot(x_collector.T) / num_words  # calculate the un-centered correlation matrix
+    C = R @ np.linalg.inv(R + alpha ** (-2) * np.eye(dim))  # calculate the conceptor matrix
+    cn_vectors = ((np.eye(dim) - C) @ x_collector).T
+    return cn_vectors
+
+
+if __name__ == '__main__':
+    model_filepath = sys.argv[1]
+    output_filepath = os.path.join(os.path.dirname(
+        os.path.abspath(sys.argv[1])), 'cn.{}'.format(
+            os.path.basename(sys.argv[1])))
+    vectors = np.load(model_filepath)
+
+    print('Post-processing word vectors with CN...')
+    cn_vectors = apply_conceptor_negation(vectors, alpha=2)
+    print('Done postprocessing word vectors')
+
+    print('Saving numpy postprocessed vectors...')
+    np.save(output_filepath, cn_vectors)
+    print('Done saving numpy vectors')
+```
+
 ## Reduce models
 ```shell
 embeddix reduce --embeddings /home/debian/embeddings/original/
@@ -35,8 +68,7 @@ import datetime
 
 from tqdm import tqdm
 
-import entropix.utils.data as dutils
-import entropix.core.evaluator as evaluator
+import embeddix.core.evaluator as evaluator
 
 if __name__ == '__main__':
     MODELS_DIRPATH = '/home/debian/embeddings/reduced/'
@@ -44,34 +76,26 @@ if __name__ == '__main__':
     models_filepaths = [os.path.join(MODELS_DIRPATH, filename) for filename in
                         os.listdir(MODELS_DIRPATH) if filename.endswith('.npy')]
     with open(output_filename, 'w', encoding='utf-8') as output_stream:
-        print('NAME\tMEN-SPR\tSIMLEX-SPR\tSIMVERB-SPR\tAP\tBATTIG\tESSLI\tDIM',
+        print('NAME\tMEN-SPR\tSIMLEX-SPR\tSIMVERB-SPR\tAP\tBATTIG\tESSLI',
               file=output_stream)
         for model_filepath in tqdm(sorted(models_filepaths)):
             vocab_filepath = '{}.vocab'.format(model_filepath.split('.npy')[0])
-            model, vocab = dutils.load_model_and_vocab(
-                model_filepath, 'numpy', vocab_filepath)
             name = os.path.basename(model_filepath).split('.npy')[0]
             men_spr = evaluator.evaluate_distributional_space(
-                model, vocab, dataset='men', metric='spr', model_type='numpy',
-                distance='cosine', kfold_size=0)[0]
+                model_filepath, vocab_filepath, dataset='men')
             simlex_spr = evaluator.evaluate_distributional_space(
-                model, vocab, dataset='simlex', metric='spr', model_type='numpy',
-                distance='cosine', kfold_size=0)[0]
+                model_filepath, vocab_filepath, dataset='simlex')
             simverb_spr = evaluator.evaluate_distributional_space(
-                model, vocab, dataset='simverb', metric='spr', model_type='numpy',
-                distance='cosine', kfold_size=0)[0]
+                model_filepath, vocab_filepath, dataset='simverb')
             ap = evaluator.evaluate_distributional_space(
-                model, vocab, dataset='ap', metric=None, model_type='numpy',
-                distance=None, kfold_size=None)
+                model_filepath, vocab_filepath, dataset='ap')
             battig = evaluator.evaluate_distributional_space(
-                model, vocab, dataset='battig', metric=None, model_type='numpy',
-                distance=None, kfold_size=None)
+                model_filepath, vocab_filepath, dataset='battig')
             essli = evaluator.evaluate_distributional_space(
-                model, vocab, dataset='essli', metric=None, model_type='numpy',
-                distance=None, kfold_size=None)
-            dim = model.shape[1]
-            print('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
-                name, men_spr, simlex_spr, simverb_spr, ap, battig, essli, dim),
+                model_filepath, vocab_filepath, dataset='essli')
+            # dim = model.shape[1]
+            print('{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+                name, men_spr, simlex_spr, simverb_spr, ap, battig, essli),
                   file=output_stream)
 ```
 

@@ -27,7 +27,7 @@ def _evaluate_concept_categorization(model, vocab, dataset):
     category_words = [word for words in categories_to_words.values()
                       for word in words]
     category_words_idx = [vocab[word] for word in category_words]
-    pred_clusters = KMeans(init=centroids,
+    pred_clusters = KMeans(init=centroids, n_init=1,
                            n_clusters=len(categories)).fit_predict(
                                model[category_words_idx, :])
     true_clusters = np.array([idx for idx, words in
