@@ -4,13 +4,39 @@ import logging
 
 import numpy as np
 
+from scipy import sparse
+from tqdm import tqdm
+
 import embeddix.utils.files as futils
 
-__all__ = ('align_vocabs_and_models')
+__all__ = ('_reduce_sparse', '_get_shared_vocab')
 
 logger = logging.getLogger(__name__)
 
 
+def _get_shared_vocab(vocab1, vocab2):
+    shared_words = set(word for word in vocab1 if word in vocab2)
+    return {word: idx for idx, word in enumerate(shared_words)}
+
+
+def _reduce_sparse(model, vocab, shared_word2idx):
+    rows = []
+    columns = []
+    data = []
+    model = model.tocoo()
+    idx2word = {idx: word for word, idx in vocab.items()}
+    for i, j, v in tqdm(zip(model.row, model.col, model.data),
+                        total=len(model.data)):
+        if idx2word[i] in shared_word2idx and idx2word[j] in shared_word2idx:
+            rows.append(shared_word2idx[idx2word[i]])
+            columns.append(shared_word2idx[idx2word[j]])
+            data.append(v)
+    return sparse.csr_matrix((data, (rows, columns)),
+                             shape=(len(shared_word2idx),
+                                    len(shared_word2idx)),
+                             dtype='f')
+
+# TODO: refactor?
 def _reduce_model(model, vocab, shared_vocab):
     _model = np.empty(shape=(len(shared_vocab), model.shape[1]))
     idx_to_word = {idx: word for word, idx in shared_vocab.items()}
@@ -19,6 +45,7 @@ def _reduce_model(model, vocab, shared_vocab):
     return _model
 
 
+# TODO: refactor?
 def align_vocabs_and_models(embeddings_dirpath):
     """Align all models under dirpath on the same vocabulary."""
     logger.info('Aligning vocabularies under {}'

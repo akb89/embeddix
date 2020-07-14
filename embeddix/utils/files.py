@@ -2,9 +2,31 @@
 import os
 import logging
 
-__all__ = ('load_vocab', 'count_lines', 'load_shared_vocab')
+from scipy import sparse
+
+__all__ = ('save_vocab', 'load_vocab', 'count_lines', 'load_shared_vocab',
+           'load_sparse', 'save_sparse')
 
 logger = logging.getLogger(__name__)
+
+
+def load_sparse(matrix_filepath):
+    """Load scipy sparse matrix."""
+    return sparse.load_npz(matrix_filepath)
+
+
+def save_sparse(matrix_filepath, matrix):
+    """Save scipy sparse matrix to file."""
+    logger.info('Saving numpy matrix to {}'.format(matrix_filepath))
+    sparse.save_npz(matrix_filepath, matrix)
+
+
+def save_vocab(vocab_filepath, vocab):
+    """Save vocabulary to file."""
+    logger.info('Saving vocabulary to {}'.format(vocab_filepath))
+    with open(vocab_filepath, 'w', encoding='utf-8') as vocab_stream:
+        for word, idx in vocab.items():
+            print('{}\t{}'.format(idx, word), file=vocab_stream)
 
 
 def load_vocab(vocab_filepath):
