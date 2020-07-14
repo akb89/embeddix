@@ -72,6 +72,18 @@ def main():
                                 help='absolute path to vocabulary')
     parser_convert.add_argument('-e', '--embeddings', required=True,
                                 help='absolute path to embeddings file')
+    parser_align = subparsers.add_parser(
+        'align', formatter_class=argparse.RawTextHelpFormatter,
+        help='align spars matrices based on shared vocabulary')
+    # parser_align.set_defaults(func=_align)
+    # parser_align.add_argument('-m1', '--model-1', required=True,
+    #                           help='absolute path to first sparse matrix')
+    # parser_align.add_argument('-v1', '--vocab-1',
+    #                           help='absolute path to vocab of first matrix')
+    # parser_align.add_argument('-m2', '--model-2', required=True,
+    #                           help='absolute path to second sparse matrix')
+    # parser_align.add_argument('-v2', '--vocab-2',
+    #                           help='absolute path to vocab of second matrix')
     # parser_reduce = subparsers.add_parser(
     #     'reduce', formatter_class=argparse.RawTextHelpFormatter,
     #     help='align numpy model vocabularies. Will also align the .npy models')
