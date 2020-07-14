@@ -1,6 +1,5 @@
 """Align vocabularies across matrices."""
 import logging
-import itertools
 
 from scipy import sparse
 
@@ -14,7 +13,7 @@ def _reduce_model(model, vocab, shared_word_to_idx):
     columns = []
     data = []
     model = model.tocoo()
-    for i, j, v in itertools.izip(model.row, model.col, model.data):
+    for i, j, v in zip(model.row, model.col, model.data):
         if vocab[i] in shared_word_to_idx and vocab[j] in shared_word_to_idx:
             rows.append(shared_word_to_idx[vocab[i]])
             columns.append(shared_word_to_idx[vocab[j]])
