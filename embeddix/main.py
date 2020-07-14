@@ -72,15 +72,15 @@ def main():
                                 help='absolute path to vocabulary')
     parser_convert.add_argument('-e', '--embeddings', required=True,
                                 help='absolute path to embeddings file')
-    parser_reduce = subparsers.add_parser(
-        'reduce', formatter_class=argparse.RawTextHelpFormatter,
-        help='align numpy model vocabularies. Will also align the .npy models')
-    parser_reduce.set_defaults(func=_reduce)
-    parser_reduce.add_argument('-e', '--embeddings', required=True,
-                               help='absolute path to .npy models '
-                                    'directory. The directory should '
-                                    'contain the .vocab files '
-                                    'corresponding to the .npy models')
+    # parser_reduce = subparsers.add_parser(
+    #     'reduce', formatter_class=argparse.RawTextHelpFormatter,
+    #     help='align numpy model vocabularies. Will also align the .npy models')
+    # parser_reduce.set_defaults(func=_reduce)
+    # parser_reduce.add_argument('-e', '--embeddings', required=True,
+    #                            help='absolute path to .npy models '
+    #                                 'directory. The directory should '
+    #                                 'contain the .vocab files '
+    #                                 'corresponding to the .npy models')
     parser_evaluate = subparsers.add_parser(
         'evaluate', formatter_class=argparse.RawTextHelpFormatter,
         help='evaluate embeddings model on various intrinsic tasks')
