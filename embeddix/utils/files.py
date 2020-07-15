@@ -2,10 +2,12 @@
 import os
 import logging
 
+import numpy as np
+
 from scipy import sparse
 
 __all__ = ('save_vocab', 'load_vocab', 'count_lines', 'load_shared_vocab',
-           'load_sparse', 'save_sparse')
+           'load_sparse', 'save_sparse', 'save_dense')
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +19,14 @@ def load_sparse(matrix_filepath):
 
 def save_sparse(matrix_filepath, matrix):
     """Save scipy sparse matrix to file."""
-    logger.info('Saving numpy matrix to {}'.format(matrix_filepath))
+    logger.info('Saving scipy sparse matrix to {}'.format(matrix_filepath))
     sparse.save_npz(matrix_filepath, matrix)
+
+
+def save_dense(matrix_filepath, matrix):
+    """Save numpy dense matrix to file."""
+    logger.info('Saving numpy dense matrix to {}'.format(matrix_filepath))
+    np.save(matrix_filepath, matrix)
 
 
 def save_vocab(vocab_filepath, vocab):

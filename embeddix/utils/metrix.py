@@ -37,7 +37,6 @@ def purity(y_true, y_pred):
     return 1. / len(y_true) * np.sum(np.max(M, axis=1))
 
 
-# Note: this is scipy's spearman, without tie adjustment
 # pylint: disable=C0103
 def spearman(x, y):
     """Compute scipy Spearman correlation."""

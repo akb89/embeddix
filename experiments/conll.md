@@ -118,30 +118,55 @@ Then, run:
 
 ## Run Relation Extraction, Sentence polarity, sentiment analysis, SNLI and sentence subjectivity experiements
 
+Clone `https://github.com/akb89/Extrinsic-Evaluation-tasks`
+
+Add data under `snli`, then run:
+
+```shell
+/home/debian/venv3/bin/pip3 install -r requirements.txt
+```
+
+Make sure Keras backend is set to Tensorflow under `~/.keras/keras.json`
+
+Then run:
+```shell
+env OMP_NUM_THREADS=4 ./runner.sh \
+-v /home/debian/embeddings/text \
+-g /home/debian/Extrinsic-Evaluation-tasks/ \
+-o /home/debian/Extrinsic-Evaluation-tasks/tmp/ \
+-s /home/debian/Extrinsic-Evaluation-tasks/xp.tsv \
+-p /home/debian/venv3/bin/python3 \
+-j 5 \
+-t re,spc,sc,suc,snli
+```
+
 ## Run RMSE computation
+
+Clone matrixor `https://github.com/akb89/matrixor.git`
 
 ```python
 import os
 
 import itertools
 import numpy as np
-
 from tqdm import tqdm
 
 import matrixor
 
 
 if __name__ == '__main__':
+    OUTPUT_FILEPATH = '/home/debian/matrixor/xp-results-average.txt'
     INPUT_DIRPATH = '/home/debian/embeddings/reduced/'
     MODELS_PATH = [os.path.join(INPUT_DIRPATH, filename) for filename in
                    os.listdir(INPUT_DIRPATH) if filename.endswith('.npy')]
     total_num = len([_ for _ in itertools.combinations(MODELS_PATH, 2)])
-    for A_path, B_path in tqdm(itertools.combinations(MODELS_PATH, 2), total=total_num):
-        A_name = os.path.basename(A_path).split('.npy')[0]
-        B_name = os.path.basename(B_path).split('.npy')[0]
-        A = np.load(A_path)
-        B = np.load(B_path)
-        rmse = matrixor.align(A, B)
-        print('{}\t{}\tRMSE = {}'.format(A_name, B_name, rmse))
+    with open(OUTPUT_FILEPATH, 'w', encoding='utf-8') as output_str:
+      for A_path, B_path in tqdm(itertools.combinations(MODELS_PATH, 2), total=total_num):
+          A_name = os.path.basename(A_path).split('.npy')[0]
+          B_name = os.path.basename(B_path).split('.npy')[0]
+          A = np.load(A_path)
+          B = np.load(B_path)
+          rmse = matrixor.align(A, B, average=True)
+          print('{}\t{}\tRMSE = {}'.format(A_name, B_name, rmse), file=output_str)
 
 ```
