@@ -9,17 +9,20 @@ from tqdm import tqdm
 
 import embeddix.utils.files as futils
 
-__all__ = ('_reduce_sparse', '_get_shared_vocab')
+__all__ = ('_reduce_sparse', '_get_shared_vocab', '_reduce_dense')
 
 logger = logging.getLogger(__name__)
 
 
 def _get_shared_vocab(vocab1, vocab2):
+    """Return intersection of two vocabs."""
     shared_words = set(word for word in vocab1 if word in vocab2)
     return {word: idx for idx, word in enumerate(shared_words)}
 
 
-def _reduce_sparse(model, vocab, shared_word2idx):
+# pylint: disable=C0103
+def _reduce_sparse(model, vocab, shared_vocab):
+    """Reduce a sparse CSR matrix from vocab to shared_vocab (rows + columns)."""
     rows = []
     columns = []
     data = []
@@ -27,21 +30,21 @@ def _reduce_sparse(model, vocab, shared_word2idx):
     idx2word = {idx: word for word, idx in vocab.items()}
     for i, j, v in tqdm(zip(model.row, model.col, model.data),
                         total=len(model.data)):
-        if idx2word[i] in shared_word2idx and idx2word[j] in shared_word2idx:
-            rows.append(shared_word2idx[idx2word[i]])
-            columns.append(shared_word2idx[idx2word[j]])
+        if idx2word[i] in shared_vocab and idx2word[j] in shared_vocab:
+            rows.append(shared_vocab[idx2word[i]])
+            columns.append(shared_vocab[idx2word[j]])
             data.append(v)
     return sparse.csr_matrix((data, (rows, columns)),
-                             shape=(len(shared_word2idx),
-                                    len(shared_word2idx)),
+                             shape=(len(shared_vocab),
+                                    len(shared_vocab)),
                              dtype='f')
 
 
-# TODO: refactor?
-def _reduce_model(model, vocab, shared_vocab):
+def _reduce_dense(model, vocab, shared_vocab):
+    """Reduce a dense ndarray from vocab to shared_vocab (rows only)."""
     _model = np.empty(shape=(len(shared_vocab), model.shape[1]))
-    idx_to_word = {idx: word for word, idx in shared_vocab.items()}
-    for idx, word in idx_to_word.items():
+    idx2word = {idx: word for word, idx in shared_vocab.items()}
+    for idx, word in idx2word.items():
         _model[idx] = model[vocab[word]]
     return _model
 
@@ -63,7 +66,7 @@ def align_vocabs_and_models(embeddings_dirpath):
         vocab_filepath = os.path.join(embeddings_dirpath,
                                       '{}.vocab'.format(model_name))
         vocab = futils.load_vocab(vocab_filepath)
-        reduced_model = _reduce_model(model, vocab, shared_vocab)
+        reduced_model = _reduce_dense(model, vocab, shared_vocab)
         reduced_model_filepath = os.path.join(embeddings_dirpath,
                                               '{}-reduced'.format(model_name))
         np.save(reduced_model_filepath, reduced_model)
