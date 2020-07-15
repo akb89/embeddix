@@ -43,21 +43,6 @@ embeddix convert --to numpy --embeddings /absolute/path/to/embeddings.txt
 embeddix convert --to txt --embeddings /absolute/path/to/embeddings.npy
 ```
 
-### Align vocabularies across numpy matrices
-To align BOTH row and column vectors based on vocabularies.
-```shell
-embeddix align \
-  --model1 /absolute/path/to/npy/model1 \
-  --vocab1 /absolute/path/to/corresponding/vocab1 \
-  --model2 /absolute/path/to/npy/model2 \
-  --vocab1 /absolute/path/to/corresponding/vocab2 \
-```
-
-### Align vocabularies across models (to be refactored, works only for dense matrices)
-```shell
-embeddix reduce --embeddings /absolute/path/to/embeddings/directory/
-```
-
 ### Evaluate DSM on intrinsic tasks
 Evaluate on lexical similarity (men, simlex, simverb) or concept categorization (essli, ap, battig)
 ```shell

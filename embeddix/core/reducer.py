@@ -36,6 +36,7 @@ def _reduce_sparse(model, vocab, shared_word2idx):
                                     len(shared_word2idx)),
                              dtype='f')
 
+
 # TODO: refactor?
 def _reduce_model(model, vocab, shared_vocab):
     _model = np.empty(shape=(len(shared_vocab), model.shape[1]))
