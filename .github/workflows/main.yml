@@ -40,7 +40,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests
-    - name: Lint with pylint, pycodestyle and pydocstyle
+    - name: Lint with pylint and pydocstyle
       run: |
         pylint embeddix
         pydocstyle embeddix
