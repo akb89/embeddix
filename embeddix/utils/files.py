@@ -12,6 +12,11 @@ __all__ = ('save_vocab', 'load_vocab', 'count_lines', 'load_shared_vocab',
 logger = logging.getLogger(__name__)
 
 
+def load_dense(matrix_filepath):
+    """Load numpy dense matrix."""
+    return np.load(matrix_filepath)
+
+
 def load_sparse(matrix_filepath):
     """Load scipy sparse matrix."""
     return sparse.load_npz(matrix_filepath)
