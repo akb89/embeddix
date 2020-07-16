@@ -37,10 +37,20 @@ def purity(y_true, y_pred):
     return 1. / len(y_true) * np.sum(np.max(M, axis=1))
 
 
+def rmse(x, y):
+    """Return root mean squared error."""
+    return np.sqrt(((x - y) ** 2).mean())
+
+
 # pylint: disable=C0103
 def spearman(x, y):
-    """Compute scipy Spearman correlation."""
+    """Compute Spearman correlation."""
     return stats.spearmanr(x, y)[0]
+
+
+def pearson(x, y):
+    """Compute Pearson correlation."""
+    return stats.pearsonr(x, y)[0]
 
 
 def similarity(left_vectors, right_vectors):

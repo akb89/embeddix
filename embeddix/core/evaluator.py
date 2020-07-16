@@ -47,8 +47,8 @@ def _evaluate_word_similarity(model, vocab, dataset):
     right_vectors = model[right_idx]
     model_sim = metrix.similarity(left_vectors, right_vectors)
     spr = metrix.spearman(sim, model_sim)
-    if np.isnan(spr):
-        spr = -1.
+    # if np.isnan(spr):
+    #     spr = -1.
     logger.info('Spearman correlation = {}'.format(spr))
     return spr
 
