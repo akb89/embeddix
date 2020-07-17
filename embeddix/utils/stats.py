@@ -12,13 +12,13 @@ __all__ = ('steiger_test_pval')
 
 # pylint: disable=C0103
 def steiger_test_pval(xy, xz, yz, n, twotailed=True):
-    """
-    Calculates the statistic significance between two dependent correlation coefficients
+    """Calculate statisticical significance between two dependent correlations.
+
     @param xy: correlation coefficient between x and y
     @param xz: correlation coefficient between x and z
     @param yz: correlation coefficient between y and z
     @param n: number of elements in x, y and z
-    @param twotailed: whether to calculate a one or two tailed test, only works for 'steiger' method
+    @param twotailed: whether to calculate a one or two tailed test
     @return: p-val
     """
     d = xy - xz

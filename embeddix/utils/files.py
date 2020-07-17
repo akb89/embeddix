@@ -1,13 +1,12 @@
 """Files utils."""
-import os
 import logging
 
 import numpy as np
 
 from scipy import sparse
 
-__all__ = ('save_vocab', 'load_vocab', 'count_lines', 'load_shared_vocab',
-           'load_sparse', 'save_sparse', 'save_dense')
+__all__ = ('save_vocab', 'load_vocab', 'count_lines',
+           'load_sparse', 'save_sparse', 'save_dense', 'get_shared_vocab')
 
 logger = logging.getLogger(__name__)
 
@@ -63,23 +62,7 @@ def count_lines(input_filepath):
     return counter
 
 
-def _get_shared_vocab(vocabs):
-    shared_words = set()
-    for word in vocabs[0].keys():
-        is_found_in_all = True
-        for vocab in vocabs[1:]:
-            if word not in vocab:
-                is_found_in_all = False
-                break
-        if is_found_in_all:
-            shared_words.add(word)
-    return {word: idx for idx, word in enumerate(shared_words)}
-
-
-def load_shared_vocab(vocabs_dirpath):
-    """Get intersection of all vocabularies under dirpath."""
-    vocabs_names = [filename for filename in os.listdir(vocabs_dirpath) if
-                    filename.endswith('.vocab')]
-    vocabs = [load_vocab(os.path.join(vocabs_dirpath, vocab_name))
-              for vocab_name in vocabs_names]
-    return _get_shared_vocab(vocabs)
+def get_shared_vocab(x_vocab, y_vocab):
+    """Return shared vocab between x and y."""
+    return {word: idx for idx, word in enumerate(x_vocab.keys()) if word
+            in y_vocab}
