@@ -62,7 +62,7 @@ def count_lines(input_filepath):
     return counter
 
 
-def get_shared_vocab(x_vocab, y_vocab):
-    """Return shared vocab between x and y."""
-    return {word: idx for idx, word in enumerate(x_vocab.keys()) if word
-            in y_vocab}
+def get_shared_vocab(vocab1, vocab2):
+    """Return intersection of two vocabs."""
+    shared_words = set(word for word in vocab1 if word in vocab2)
+    return {word: idx for idx, word in enumerate(shared_words)}

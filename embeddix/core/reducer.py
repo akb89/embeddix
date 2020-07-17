@@ -9,15 +9,9 @@ from tqdm import tqdm
 
 import embeddix.utils.files as futils
 
-__all__ = ('_reduce_sparse', '_get_shared_vocab', '_reduce_dense')
+__all__ = ('_reduce_sparse', '_reduce_dense')
 
 logger = logging.getLogger(__name__)
-
-
-def _get_shared_vocab(vocab1, vocab2):
-    """Return intersection of two vocabs."""
-    shared_words = set(word for word in vocab1 if word in vocab2)
-    return {word: idx for idx, word in enumerate(shared_words)}
 
 
 # pylint: disable=C0103
