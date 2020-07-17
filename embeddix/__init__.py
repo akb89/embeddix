@@ -13,6 +13,8 @@ from .utils.metrix import similarity
 from .utils.metrix import spearman
 from .utils.metrix import pearson
 from .utils.metrix import rmse
+from .utils.metrix import hmean
+from .utils.stats import steiger_test_pval
 from .core.reducer import _reduce_dense as reduce_dense
 from .core.reducer import _get_shared_vocab as get_shared_vocab
 from .core.reducer import _reduce_sparse as reduce_sparse

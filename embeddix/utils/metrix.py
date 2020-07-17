@@ -6,7 +6,7 @@ import scipy.stats as stats
 
 logger = logging.getLogger(__name__)
 
-__all__ = ('purity', 'spearman', 'similarity')
+__all__ = ('purity', 'spearman', 'similarity', 'rmse', 'pearson', 'hmean')
 
 
 # pylint: disable=C0103,W0622
@@ -35,6 +35,11 @@ def purity(y_true, y_pred):
         pred_clusters[id] = (y_pred == cl).astype('int')
     M = pred_clusters.dot(true_clusters.T)
     return 1. / len(y_true) * np.sum(np.max(M, axis=1))
+
+
+def hmean(values):
+    """Return harmonic mean of values."""
+    return stats.hmean(values)
 
 
 def rmse(x, y):
