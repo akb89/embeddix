@@ -8,7 +8,7 @@ import embeddix.utils.files as futils
 import embeddix.utils.metrix as metrix
 import embeddix.utils.data as dutils
 
-__all__ = ('evaluate_distributional_space')
+__all__ = ('evaluate_distributional_space', 'evaluate_word_similarity')
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,8 @@ def _evaluate_concept_categorization(model, vocab, dataset):
     return purity
 
 
-def _evaluate_word_similarity(model, vocab, dataset):
+def evaluate_word_similarity(model, vocab, dataset):
+    """Evaluate lexical similarity/relatedness."""
     if dataset not in ['men', 'simlex', 'simverb']:
         raise Exception('Invalid similarity dataset: {}'.format(dataset))
     logger.info('Evaluating word similarity on {}'.format(dataset))
@@ -47,8 +48,6 @@ def _evaluate_word_similarity(model, vocab, dataset):
     right_vectors = model[right_idx]
     model_sim = metrix.similarity(left_vectors, right_vectors)
     spr = metrix.spearman(sim, model_sim)
-    # if np.isnan(spr):
-    #     spr = -1.
     logger.info('Spearman correlation = {}'.format(spr))
     return spr
 
@@ -61,5 +60,5 @@ def evaluate_distributional_space(embeddings_filepath, vocab_filepath,
     model = np.load(embeddings_filepath)
     vocab = futils.load_vocab(vocab_filepath)
     if dataset in ['men', 'simlex', 'simverb']:
-        return _evaluate_word_similarity(model, vocab, dataset)
+        return evaluate_word_similarity(model, vocab, dataset)
     return _evaluate_concept_categorization(model, vocab, dataset)

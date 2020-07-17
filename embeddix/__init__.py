@@ -17,3 +17,4 @@ from .core.reducer import _reduce_dense as reduce_dense
 from .core.reducer import _get_shared_vocab as get_shared_vocab
 from .core.reducer import _reduce_sparse as reduce_sparse
 from .core.converter import convert_to_txt
+from .core.evaluator import evaluate_word_similarity
