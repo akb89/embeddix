@@ -6,7 +6,8 @@ import scipy.stats as stats
 
 logger = logging.getLogger(__name__)
 
-__all__ = ('purity', 'spearman', 'similarity', 'rmse', 'pearson', 'hmean')
+__all__ = ('purity', 'spearman', 'similarity', 'rmse', 'pearson', 'hmean',
+           'energy')
 
 
 # pylint: disable=C0103,W0622
@@ -68,3 +69,19 @@ def similarity(left_vectors, right_vectors):
     norms = np.linalg.norm(left_vectors, axis=1) * np.linalg.norm(
         right_vectors, axis=1)
     return dotprod / norms
+
+
+def energy(matrix):
+    """Compute the energy of the model.
+
+    Energy is defined as the square of the Frobenius norm, which is also
+    the square sum of singular values.
+    """
+    if matrix.ndim == 1:
+        logger.info('Computing energy from singular values...')
+        return np.sum(matrix**2)
+    if matrix.__class__.__name__ != 'csr_matrix':
+        raise Exception('Cannot compute energy on non-CSR sparse matrix')
+    logger.info('Computing energy from squared Frobenius norm of scipy '
+                'csr_matrix...')
+    return matrix.power(2).sum()
