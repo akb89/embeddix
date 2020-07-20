@@ -6,9 +6,28 @@ import numpy as np
 from scipy import sparse
 
 __all__ = ('save_vocab', 'load_vocab', 'count_lines',
-           'load_sparse', 'save_sparse', 'save_dense', 'get_shared_vocab')
+           'load_sparse', 'save_sparse', 'save_dense', 'get_shared_vocab',
+           'save_counts', 'load_counts')
 
 logger = logging.getLogger(__name__)
+
+
+def load_counts(counts_filepath):
+    """Load word counts dict from file."""
+    counts = {}
+    with open(counts_filepath, 'r', encoding='utf-8') as input_stream:
+        for line in input_stream:
+            linesplit = line.strip().split('\t')
+            counts[linesplit[0]] = int(linesplit[1])
+    return counts
+
+
+def save_counts(counts_filepath, counts):
+    """Save word counts dict to file."""
+    with open(counts_filepath, 'w', encoding='utf-8') as counts_str:
+        for word, count in sorted(counts.items(), key=lambda x: x[1],
+                                  reverse=True):
+            print('{}\t{}'.format(word, count), file=counts_str)
 
 
 def load_dense(matrix_filepath):

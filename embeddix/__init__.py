@@ -7,6 +7,8 @@ from .utils.files import load_dense
 from .utils.files import save_sparse
 from .utils.files import save_dense
 from .utils.files import save_vocab
+from .utils.files import load_counts
+from .utils.files import save_counts
 from .utils.data import load_dataset
 from .utils.metrix import similarity
 from .utils.metrix import spearman
