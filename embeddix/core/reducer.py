@@ -9,13 +9,13 @@ from tqdm import tqdm
 
 import embeddix.utils.files as futils
 
-__all__ = ('_reduce_sparse', '_reduce_dense')
+__all__ = ('reduce_sparse', 'reduce_dense')
 
 logger = logging.getLogger(__name__)
 
 
 # pylint: disable=C0103
-def _reduce_sparse(model, vocab, shared_vocab):
+def reduce_sparse(model, vocab, shared_vocab):
     """Reduce a sparse CSR matrix from vocab to shared_vocab (rows + columns)."""
     rows = []
     columns = []
@@ -34,7 +34,7 @@ def _reduce_sparse(model, vocab, shared_vocab):
                              dtype='f')
 
 
-def _reduce_dense(model, vocab, shared_vocab):
+def reduce_dense(model, vocab, shared_vocab):
     """Reduce a dense ndarray from vocab to shared_vocab (rows only)."""
     _model = np.empty(shape=(len(shared_vocab), model.shape[1]))
     idx2word = {idx: word for word, idx in shared_vocab.items()}
@@ -60,7 +60,7 @@ def align_vocabs_and_models(embeddings_dirpath):
         vocab_filepath = os.path.join(embeddings_dirpath,
                                       '{}.vocab'.format(model_name))
         vocab = futils.load_vocab(vocab_filepath)
-        reduced_model = _reduce_dense(model, vocab, shared_vocab)
+        reduced_model = reduce_dense(model, vocab, shared_vocab)
         reduced_model_filepath = os.path.join(embeddings_dirpath,
                                               '{}-reduced'.format(model_name))
         np.save(reduced_model_filepath, reduced_model)
