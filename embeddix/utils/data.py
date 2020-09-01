@@ -6,7 +6,7 @@ import csv
 from collections import defaultdict
 
 
-__all__ = ('load_dataset')
+__all__ = ('load_dataset', 'load_dataset_words')
 
 
 logger = logging.getLogger(__name__)
@@ -110,3 +110,17 @@ def load_dataset(dataset, vocab):
         left, right, sim = _load_word_pairs_and_sim(dataset)
         return _load_idx_and_sim(left, right, sim, vocab, dataset)
     return _load_categories_to_words_dict(dataset, vocab)
+
+
+def load_dataset_words(dataset):
+    """Load set of words found in dataset."""
+    if dataset not in ['men', 'simlex', 'simverb']:
+        raise Exception('Unsupported dataset: {}'.format(dataset))
+    words = set()
+    with open(DATASETS[dataset], 'r', encoding='utf-8') as data_stream:
+        for line in data_stream:
+            line = line.rstrip('\n')
+            items = line.split()
+            words.add(items[0])
+            words.add(items[1])
+    return words
