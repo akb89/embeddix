@@ -32,7 +32,7 @@ setup(
         ],
     },
     install_requires=['pyyaml>=4.2b1', 'tqdm==4.35.0', 'scikit-learn==0.21.2',
-                      'scipy==1.5.1', 'numpy==1.19.0'],
+                      'scipy==1.10.0', 'numpy==1.19.0'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Environment :: Web Environment',
                  'Intended Audience :: Developers',
